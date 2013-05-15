@@ -1,0 +1,152 @@
+﻿@{
+    ViewBag.Title = "Authenticated";
+}
+
+<h2>Authenticated</h2>
+<link href="~/Content/chat.css" rel="stylesheet" />
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<link href="~/Content/bootstrap/css/bootstrap.css" rel="stylesheet" />
+
+<div class="navbar">
+    
+</div>
+
+<span id="totalChatters" style="width:100%; text-align: right;">
+</span>
+<div style="width:100%">
+    <div id="chatContent" style="overflow-y:scroll; height:500px; width:80%; font-family: Tahoma; font-size:10pt; border:dashed 1px blue; float:left;">
+    </div>
+    
+    <div id="nicklist" style="float:left; height:500px; width:10%; border:dashed 1px blue;">
+        <ul id="names">
+
+        </ul>
+    </div>
+</div>
+
+<div>
+    <div style="width:80%; float:left;">
+        <input class="input-large" id="chatText" type="text" style="width:1000px; height:25px; margin-top: 12px; margin-left: 5px;" />
+        <button id="sendMessage" class="btn btn-success"><i class="icon-white icon-comment"></i></button>
+        <button id="sendGesture" class="btn btn-success"><i class="icon-white icon-pencil"></i></button>
+        <button class="btn btn-danger"><i class="icon-white icon-music"></i></button>
+    </div>
+    <div style="width:20%; float:right; margin-top:10px;">
+        <button class="btn btn-primary"><i class="icon-white icon-user"></i></button>
+                <button class="btn btn-primary"><i class="icon-white icon-comment"></i></button>
+        <button class="btn btn-primary"><i class="icon-white icon-star"></i></button>
+        <button class="btn btn-primary"><i class="icon-white icon-thumbs-down"></i></button>    
+    </div>
+</div>
+
+<script>
+
+    var chat = {};
+
+    chat.operations = {
+        names: function() {
+            $.ajax({
+                url: '@Url.Action("GetNames")',
+                type: "POST",
+                success: function(names) {
+                    $("#names").html('');
+                    $("#totalChatters").val('Total chatters: ' + names.data.length);
+                    var i;
+                    for (i = 0; i < names.data.length; i++) {
+                        chat.operations.addHost(names.data[i]);
+                        $("#names").append(chat.operations.parseHosts(names.data[i]) + "</li>");
+                    }
+                }
+            });
+        },
+        
+        hosts : [],
+
+        addHost: function (host) {
+            if (host.indexOf('@@') > -1) {
+                var hostName = host.substring(1, host.length);
+                chat.operations.hosts.push(hostName);
+            }
+        },
+        
+        isHost: function(nickname) {
+            for (var count = 0; count <= chat.operations.hosts.length; count++) {
+                if (chat.operations.hosts[count] == nickname) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        parseHosts: function (name) {
+          if (name.indexOf('@@') > -1) {
+              return "<li class='host'>" + name.substring(1, name.length - 1);
+          } else {
+              return "<li>" + name;
+          }
+        },
+
+        parser: function(msg)
+        {
+                if (msg[0].indexOf("joined the chat room") > -1) {
+                    chat.operations.names();
+                }
+            
+                if (msg[0].indexOf("left the chat room") > -1) {
+                    chat.operations.names();
+                }
+        }
+    };
+    
+    $("#refreshNames").click(function () {
+        chat.operations.names();
+    });
+
+    setInterval(function () {
+        $.ajax({
+            url: '@Url.Action("GetMessages")',
+            type: "POST",
+            success: function (data) {
+                if (data.message != "" && data.message != null && data.message != undefined) {
+                    chat.operations.parser(data.message);
+                    var nickname = data.message[0].substring(0, data.message[0].indexOf(":") - 1);
+                    var isHost = chat.operations.isHost(nickname);
+                    
+                    if (isHost) {
+                        $("#chatContent").append("&nbsp <span class='host-message'><p class='message'>" + data.message + "</p></span>");
+                    } else {
+                        $("#chatContent").append("&nbsp<p class='message'>" + data.message + "</p>");
+                    }
+                    scrollToBottom();
+                }
+            }
+        });
+    }, 3000);
+
+    $("#sendMessage").click(function () {
+        var chatMsg = $("#chatText").val();
+
+        $.ajax({
+            url: '@Url.Action("PostMessage")',
+            type: "POST",
+            data: { msg : chatMsg },
+            success: function () {
+                $("#chatContent").append("<p class='message'>Me : " + chatMsg + "</p><br />");
+                scrollToBottom();
+                $("#chatText").val('');
+            }
+        });
+    });
+
+
+    function scrollToBottom() {
+        var element = document.getElementById("chatContent");
+        element.scrollTop = element.scrollHeight;
+    }
+
+    $("#names li").click(function () {
+        
+        $(this).addClass('selected');
+    });
+
+</script>

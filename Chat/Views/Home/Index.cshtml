@@ -1,0 +1,13 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+@using(Html.BeginForm("Authenticate", "Home", FormMethod.Post))
+{
+    <input name="username" value="1" />
+    <input name="password" />
+
+    <input type="submit" value="Connect!" />
+}

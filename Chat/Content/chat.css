@@ -1,0 +1,62 @@
+﻿body {
+    background-color: #3e454c !important;
+    font-family: Tahoma;
+    font-size: 14pt;
+}
+
+#chatContent, #nicklist {
+    background-color: white;
+}
+
+p.message 
+{
+    margin-left:23px;
+    margin-top: 3px;
+    position: relative;
+}
+
+p.join-channel
+{
+    color: dimgrey;
+    margin-left: 15px;
+}
+
+span.host-message 
+{
+    background-image: url("Images/butterfly.jpg");
+    display: block;
+    height: 32px;
+    margin-top: -2px;
+    background-repeat: no-repeat;
+}
+
+#names li:first-child {
+    margin-top: 10px;
+}
+
+#names li {
+    list-style-image: url("Images/user-icon.png");
+    font-family: Tahoma;
+    font-size: 10pt;
+    margin-bottom: 3px;
+    margin-left: 5px;
+}
+
+#names li:hover {
+    cursor: pointer;
+}
+
+#names li.host 
+{
+    margin-left: 12px;
+    list-style-image: url("Images/butterfly.jpg");
+}
+
+input {
+    font-size: 8pt !important;
+}
+
+#names li.selected {
+    background-color: cadetblue;
+    color: white;
+}
